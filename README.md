@@ -31,15 +31,15 @@ pip install .
 ## Usage
 Generate a build command for a ROS 2 image:
 ```bash
-rosdocker humble
+rosdocker build humble
 ```
 Generate a build command including Gazebo:
 ```bash
-rosdocker jazzy --gazebo
+rosdocker build jazzy --gazebo
 ```
 Execute the generated command:
 ```bash
-rosdocker humble --gazebo | sh
+rosdocker build humble --gazebo | sh
 ```
 For help:
 ```bash

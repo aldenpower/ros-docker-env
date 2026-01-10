@@ -1,17 +1,10 @@
-import os
 import sys
-import argparse
+from os import getuid, environ
 from importlib import resources
 from ros_docker_env.utils import eprint
 
 
-def main():
-    parser = argparse.ArgumentParser(prog="rosdocker")
-    parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted"])
-    parser.add_argument(
-      "--gazebo", action="store_true", help="Install gazebo to image")
-    args = parser.parse_args()
-
+def handle_build(args):
     image_name = f"ubuntu/ros_{args.rosdistro}"
 
     docker_files_dir = resources.files(
@@ -20,8 +13,8 @@ def main():
     base_docker_file_path = docker_files_dir.joinpath("base.Dockerfile")
 
     try:
-        user_id = os.getuid()
-        username = os.environ.get("USER", "user")
+        user_id = getuid()
+        username = environ.get("USER", "user")
 
         build_cmd = [
           "docker", "build",
@@ -74,7 +67,3 @@ def main():
         sys.exit(1)
 
     print(" ".join(build_cmd))
-
-
-if __name__ == '__main__':
-    main()

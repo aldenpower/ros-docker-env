@@ -14,7 +14,7 @@ authors = [
 dependencies = []
 
 [project.scripts]
-rosdocker = "ros_docker_env.builder:main"
+rosdocker = "ros_docker_env.cli:main"
 
 [tool.setuptools.package-data]
 ros_docker_env = ["resources/docker/*"]
