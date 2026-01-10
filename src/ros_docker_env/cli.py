@@ -1,5 +1,6 @@
 import argparse
 from ros_docker_env.builder import handle_build
+from ros_docker_env.runner import handle_run
 
 
 def main():
@@ -9,10 +10,18 @@ def main():
     build_parser = subparsers.add_parser(
       "build", help="Generate ROS image build command")
 
-    parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted"])
-    parser.add_argument(
+    build_parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted"])
+    build_parser.add_argument(
       "--gazebo", action="store_true", help="Install gazebo to image")
     build_parser.set_defaults(func=handle_build)
+
+    # Run Subcommand
+    run_parser = subparsers.add_parser(
+      "run", help="Run the ROS container")
+
+    run_parser.add_argument("image_name", help="Name of the image to run")
+    # run_parser.add_argument("--gazebo", action="store_true")
+    run_parser.set_defaults(func=handle_run)
 
     args = parser.parse_args()
     args.func(args)

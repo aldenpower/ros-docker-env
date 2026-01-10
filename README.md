@@ -16,9 +16,7 @@ At the moment, ros-docker-env focuses on:
 - Generating Docker build commands for ROS 2 images
 - Selecting appropriate base images and simulation dependencies
 - Providing a command-line interface
-
-The long-term goal is to expand this into a more complete environment manager, including features such as
-Running ROS 2 containers
+- Running ROS2 containers
 
 ## Installation
 
@@ -40,6 +38,10 @@ rosdocker build jazzy --gazebo
 Execute the generated command:
 ```bash
 rosdocker build humble --gazebo | sh
+```
+Run a container from the generated image:
+```bash
+rosdocker run [image_name]
 ```
 For help:
 ```bash
