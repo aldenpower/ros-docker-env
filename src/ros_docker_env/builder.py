@@ -26,9 +26,15 @@ def handle_build(args):
           f"username={username}",
         ]
         if args.rosdistro == "humble":
-            base_image = "ubuntu:jammy"
+            if args.nvidia:
+                base_image = "nvidia/opengl:1.0-glvnd-devel-ubuntu22.04"
+            else:
+                base_image = "ubuntu:jammy"
         else:
-            base_image = "ubuntu:noble"
+            if args.nvidia:
+                base_image = "nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04"
+            else:
+                base_image = "ubuntu:noble"
 
         build_cmd += [
           "--build-arg",
