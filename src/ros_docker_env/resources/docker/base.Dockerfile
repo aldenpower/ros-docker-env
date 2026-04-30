@@ -1,9 +1,14 @@
 ARG base_image=ubuntu:jammy
+# Stage 1
 FROM $base_image AS base
 
-RUN apt update \
- && apt install -y \
-   sudo
+# Install sudo and basic deps
+RUN apt-get update && apt-get install -y \
+    sudo \
+    curl \
+    gnupg2 \
+    lsb-release \
+ && rm -rf /var/lib/apt/lists/*
 
 ARG user_id
 ARG username
@@ -25,14 +30,16 @@ USER $USERNAME
 
 WORKDIR /home/$USERNAME
 
-RUN export DEBIAN_FRONTEND=noninteractive \
- && sudo apt-get update \
- && sudo -E apt-get install -y \
+RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     tzdata \
-    apt-utils \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    bash-completion \
  && sudo ln -fs /usr/share/zoneinfo/America/Bahia /etc/localtime \
  && sudo dpkg-reconfigure --frontend noninteractive tzdata \
- && sudo apt-get clean
+ && sudo rm -rf /var/lib/apt/lists/*
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -51,40 +58,48 @@ RUN sudo apt update \
    bash-completion \
   && sudo apt-get clean
 
+# Stage 2
 FROM base AS ros
-
-# Name of the ROS distribution
 ARG ros_distribution
 
-#     # Add the ROS2 repository and GPG key
-RUN sudo curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
-
-RUN sudo apt update && sudo apt install -y \
+RUN sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg \
+ && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+ && sudo apt-get update && sudo apt-get install -y \
     ros-dev-tools \
-    ros-${ros_distribution}-desktop
+    ros-${ros_distribution}-desktop \
+    python3-rosdep \
+ && sudo rosdep init && rosdep update \
+ && sudo rm -rf /var/lib/apt/lists/*
 
-RUN sudo apt update && \
-    sudo apt install -y \
-    python3-pip \
-    python3-rosdep
-    # && sudo rm -rf /var/lib/apt/lists/*
-
-# Initialize rosdep
-RUN sudo rosdep init && \
-    rosdep update
-
+# Stage 3
 FROM ros AS gazebo
-
-# Name of the Gazebo distribution
 ARG gz_distribution
 
-RUN sudo /bin/bash -c 'curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg'
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-RUN sudo apt-get update
-RUN sudo apt install -y \
-  ${gz_distribution}
+# Gazebo Installation
+RUN sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
+ && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null \
+ && sudo apt-get update && sudo apt-get install -y \
+    ${gz_distribution} \
+ && sudo rm -rf /var/lib/apt/lists/*
 
-FROM ros AS dev
+# --- STAGE 4: DEV ---
+FROM gazebo AS dev
+ARG ros_distribution
 
+# Removed the backslash after the final line of the printf string
+RUN sudo printf '#!/bin/bash\n\
+set -e\n\
+if [ -f "/opt/ros/%s/setup.bash" ]; then\n\
+  source "/opt/ros/%s/setup.bash"\n\
+fi\n\
+exec "$@"\n' "$ros_distribution" "$ros_distribution" | sudo tee /ros_entrypoint.sh > /dev/null \
+ && sudo chmod +x /ros_entrypoint.sh
+
+# 2. Create ROS2 Workspace
+RUN mkdir -p ~/ros2_ws/src
+
+# Add to bashrc for interactive shells
+RUN echo "source /opt/ros/${ros_distribution}/setup.bash" >> ~/.bashrc
+
+ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]

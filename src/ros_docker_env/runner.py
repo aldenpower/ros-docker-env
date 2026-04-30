@@ -2,34 +2,34 @@ from os import environ
 import subprocess
 
 
-def handle_run(args):
-    run_cmd = [
-        "docker", "run", "-it", "--rm",
+def get_base_run_args(args):
+    """Common arguments for both standard and NVIDIA runs."""
+    return [
+        "docker", "run", "-it",
         "--net=host",
+        "--ipc=host",  # Crucial for ROS 2 DDS communication
         "--env", f"DISPLAY={environ.get('DISPLAY')}",
-        "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",
+        "--volume", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
+    ]
+
+def handle_run(args):
+    run_cmd = get_base_run_args(args) + [
         "--device", "/dev/dri",
         *args.extra_args,
         args.image_name
     ]
-    print(f"{' '.join(run_cmd)}")
+    print(f"Running (Standard): {' '.join(run_cmd)}")
     subprocess.run(run_cmd)
 
 
 def handle_run_nvidia(args):
-    run_cmd = [
-        "docker", "run", "-it",
-        "--net=host",
+    run_cmd = get_base_run_args(args) + [
         "--gpus", "all",
         "--env", "NVIDIA_VISIBLE_DEVICES=all",
         "--env", "NVIDIA_DRIVER_CAPABILITIES=all",
-        "--env", f"DISPLAY={environ.get('DISPLAY')}",
-        "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",
-        # optional shared memory improvement for Gazebo
-        "--shm-size=1g",
+        "--shm-size=1g", # Good for Gazebo
         *args.extra_args,
         args.image_name
     ]
-
-    print(" ".join(run_cmd))
+    print(f"Running (NVIDIA): {' '.join(run_cmd)}")
     subprocess.run(run_cmd)
