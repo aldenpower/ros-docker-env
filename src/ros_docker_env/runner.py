@@ -1,5 +1,7 @@
+import sys
 from os import environ
 import subprocess
+from ros_docker_env.utils import eprint
 
 
 def get_base_run_args(args):
@@ -27,9 +29,14 @@ def handle_run_nvidia(args):
         "--gpus", "all",
         "--env", "NVIDIA_VISIBLE_DEVICES=all",
         "--env", "NVIDIA_DRIVER_CAPABILITIES=all",
-        "--shm-size=1g", # Good for Gazebo
+        "--device", "/dev/dri:/dev/dri",
+        "--shm-size=1g",
         *args.extra_args,
         args.image_name
     ]
     print(f"Running (NVIDIA): {' '.join(run_cmd)}")
-    subprocess.run(run_cmd)
+    try:
+        subprocess.run(run_cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        eprint(f"Docker build failed with exit code {e.returncode}")
+        sys.exit(e.returncode)

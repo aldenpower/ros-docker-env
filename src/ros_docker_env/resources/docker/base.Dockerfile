@@ -33,7 +33,7 @@ WORKDIR /home/$USERNAME
 RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     tzdata \
     build-essential \
-    cmake \
+    tmux \
     git \
     wget \
     bash-completion \
@@ -98,8 +98,13 @@ exec "$@"\n' "$ros_distribution" "$ros_distribution" | sudo tee /ros_entrypoint.
 # 2. Create ROS2 Workspace
 RUN mkdir -p ~/ros2_ws/src
 
-# Add to bashrc for interactive shells
-RUN echo "source /opt/ros/${ros_distribution}/setup.bash" >> ~/.bashrc
+RUN if [ -f ~/.bashrc ]; then \
+    echo "export PS1='\[\033[01;32m\]\u@docker-ros\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> ~/.bashrc; \
+    fi
+
+RUN echo "alias drosdep='rosdep install --rosdistro=${ros_distribution} --from-paths src -y --ignore-src'" >> ~/.bash_aliases
+
+RUN echo "alias ${ros_distribution}='source /opt/ros/${ros_distribution}/setup.bash'" >> ~/.bash_aliases
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
