@@ -1,7 +1,13 @@
 import argparse
 from ros_docker_env.builder import handle_build
-from ros_docker_env.runner import handle_run_nvidia
+from ros_docker_env.runner import handle_run, handle_run_nvidia
 
+def route_run_command(args):
+    """Routes the run command to the correct function based on the --nvidia flag."""
+    if args.nvidia:
+        handle_run_nvidia(args)
+    else:
+        handle_run(args)
 
 def main():
     parser = argparse.ArgumentParser(prog="rosdocker")
@@ -13,17 +19,17 @@ def main():
     build_parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted"])
     build_parser.add_argument(
       "--gazebo", action="store_true", help="Install gazebo to image")
-    build_parser.add_argument(
-      "--nvidia", action="store_true", help="Use nvidia images")
     build_parser.set_defaults(func=handle_build)
 
     # Run Subcommand
     run_parser = subparsers.add_parser(
       "run", help="Run the ROS container")
 
+    run_parser.add_argument(
+      "--nvidia", action="store_true", help="Use nvidia images")
     run_parser.add_argument("image_name", help="Name of the image to run")
     run_parser.add_argument("extra_args", nargs=argparse.REMAINDER)
-    run_parser.set_defaults(func=handle_run_nvidia)
+    run_parser.set_defaults(func=route_run_command)
 
     args = parser.parse_args()
     args.func(args)

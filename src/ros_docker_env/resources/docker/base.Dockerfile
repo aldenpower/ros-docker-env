@@ -1,6 +1,6 @@
-ARG base_image=ubuntu:jammy
+ARG BASE_IMAGE=ubuntu:jammy
 # Stage 1
-FROM $base_image AS base
+FROM $BASE_IMAGE AS base
 
 # Install sudo and basic deps
 RUN apt-get update && apt-get install -y \
@@ -10,17 +10,17 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
  && rm -rf /var/lib/apt/lists/*
 
-ARG user_id
-ARG username
-ENV USERNAME=$username
+ARG USER_UID
+# ARG username
+ENV USERNAME=ros2user
 
 # Check if UID already exists, and only create user if it's free
-RUN if getent passwd "$user_id" > /dev/null; then \
-      echo "User with UID $user_id already exists. Skipping useradd."; \
-      existing_user=$(getent passwd "$user_id" | cut -d: -f1); \
+RUN if getent passwd "$USER_UID" > /dev/null; then \
+      echo "User with UID $USER_UID already exists. Skipping useradd."; \
+      existing_user=$(getent passwd "$USER_UID" | cut -d: -f1); \
       usermod -l "$USERNAME" -d /home/"$USERNAME" -m "$existing_user"; \
     else \
-      useradd -U --uid "$user_id" -ms /bin/bash "$USERNAME"; \
+      useradd -U --uid "$USER_UID" -ms /bin/bash "$USERNAME"; \
     fi \
  && echo "$USERNAME:$USERNAME" | chpasswd \
  && usermod -aG sudo "$USERNAME" \
@@ -32,9 +32,6 @@ WORKDIR /home/$USERNAME
 
 RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     tzdata \
-    build-essential \
-    tmux \
-    git \
     wget \
     bash-completion \
  && sudo ln -fs /usr/share/zoneinfo/America/Bahia /etc/localtime \
@@ -49,7 +46,6 @@ RUN sudo apt update \
    build-essential \
    cmake \
    wget \
-   git \
    software-properties-common \
    apt-utils \
    curl \
@@ -86,25 +82,22 @@ RUN sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/
 FROM gazebo AS dev
 ARG ros_distribution
 
-# Removed the backslash after the final line of the printf string
-RUN sudo printf '#!/bin/bash\n\
-set -e\n\
-if [ -f "/opt/ros/%s/setup.bash" ]; then\n\
-  source "/opt/ros/%s/setup.bash"\n\
-fi\n\
-exec "$@"\n' "$ros_distribution" "$ros_distribution" | sudo tee /ros_entrypoint.sh > /dev/null \
- && sudo chmod +x /ros_entrypoint.sh
+COPY --from=tmux_config tmux.conf /home/ros2user/.tmux.conf
+COPY --from=bash bash_aliases /home/ros2user/.bash_aliases
+COPY --from=docker entrypoint.sh /home/ros2user/entrypoint.sh
+
+RUN sudo apt update \
+ && sudo apt install -y \
+   vim \
+   tmux \
+ && sudo rm -rf /var/lib/apt/lists/*
 
 # 2. Create ROS2 Workspace
 RUN mkdir -p ~/ros2_ws/src
 
 RUN if [ -f ~/.bashrc ]; then \
-    echo "export PS1='\[\033[01;32m\]\u@docker-ros\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> ~/.bashrc; \
+    echo ". /opt/ros/${ros_distribution}/setup.bash" >> ~/.bashrc; \
     fi
 
-RUN echo "alias drosdep='rosdep install --rosdistro=${ros_distribution} --from-paths src -y --ignore-src'" >> ~/.bash_aliases
-
-RUN echo "alias ${ros_distribution}='source /opt/ros/${ros_distribution}/setup.bash'" >> ~/.bash_aliases
-
-ENTRYPOINT ["/ros_entrypoint.sh"]
+ENTRYPOINT ["/home/ros2user/entrypoint.sh"]
 CMD ["bash"]

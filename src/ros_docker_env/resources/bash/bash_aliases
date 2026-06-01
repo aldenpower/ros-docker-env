@@ -1,0 +1,1 @@
+alias path='echo $PATH | tr -s ":" "\n"'
