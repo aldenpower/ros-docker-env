@@ -82,7 +82,7 @@ RUN sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/
 FROM gazebo AS dev
 ARG ros_distribution
 
-COPY --from=tmux_config tmux.conf /home/ros2user/.tmux.conf
+COPY --from=tmux tmux.conf /home/ros2user/.tmux.conf
 COPY --from=bash bash_aliases /home/ros2user/.bash_aliases
 COPY --from=docker entrypoint.sh /home/ros2user/entrypoint.sh
 
