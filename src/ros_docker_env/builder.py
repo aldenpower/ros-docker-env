@@ -95,7 +95,7 @@ def handle_build(args) -> None:
             "docker", "build",
             "--progress", "tty",
             "--target", "dev",
-            "--build-context", f"tmux_config={tmux_config}",
+            "--build-context", f"tmux={tmux_config}",
             "--build-context", f"bash={bash}",
             "--build-context", f"docker={docker}",
             "--build-arg", f"USER_UID={getuid()}",
