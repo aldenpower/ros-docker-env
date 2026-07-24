@@ -9,23 +9,18 @@ from ros_docker_env import resources_path
 def ensure_volume_exists(volume_name):
     """Create Docker named volume if it does not exist."""
 
-    try:
-        result = subprocess.run(
-          ["docker", "volume", "inspect", volume_name],
-          stdout=subprocess.DEVNULL,
-          stderr=subprocess.DEVNULL,
-          check=True
+    result = subprocess.run(
+      ["docker", "volume", "inspect", volume_name],
+      stdout=subprocess.DEVNULL,
+      stderr=subprocess.DEVNULL,
+      check=False
+    )
+    if result.returncode != 0:
+        print(f"Creating Docker volume: {volume_name}")
+        subprocess.run(
+            ["docker", "volume", "create", volume_name],
+            check=True
         )
-        if result.returncode != 0:
-            print(f"Creating Docker volume: {volume_name}")
-
-            subprocess.run(
-                ["docker", "volume", "create", volume_name],
-                check=True
-            )
-    except subprocess.CalledProcessError as e:
-        eprint(f"Docker build failed with exit code {e.returncode}")
-        sys.exit(e.returncode)
 
 
 
