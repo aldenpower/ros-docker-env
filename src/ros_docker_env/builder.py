@@ -89,6 +89,7 @@ def handle_build(args) -> None:
         docker = str(resources_path.joinpath("docker"))
         tmux_config = str(resources_path.joinpath("tmux"))
         bash = str(resources_path.joinpath("bash"))
+        scripts = str(resources_path.joinpath("scripts"))
 
         # Build command construction
         build_cmd = [
@@ -98,6 +99,7 @@ def handle_build(args) -> None:
             "--build-context", f"tmux={tmux_config}",
             "--build-context", f"bash={bash}",
             "--build-context", f"docker={docker}",
+            "--build-context", f"scripts={scripts}",
             "--build-arg", f"USER_UID={getuid()}",
             "--build-arg", f"BASE_IMAGE={base_image}",
             "--build-arg", f"ros_distribution={distro}",

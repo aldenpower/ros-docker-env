@@ -84,7 +84,8 @@ ARG ros_distribution
 
 COPY --from=tmux tmux.conf /home/ros2user/.tmux.conf
 COPY --from=bash bash_aliases /home/ros2user/.bash_aliases
-COPY --from=docker entrypoint.sh /home/ros2user/entrypoint.sh
+COPY --from=docker entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --from=scripts . /usr/local/bin/
 
 RUN sudo apt update \
  && sudo apt install -y \
@@ -93,11 +94,11 @@ RUN sudo apt update \
  && sudo rm -rf /var/lib/apt/lists/*
 
 # 2. Create ROS2 Workspace
-RUN mkdir -p ~/ros2_ws/src
+RUN mkdir -p ~/ros2_ws
 
 RUN if [ -f ~/.bashrc ]; then \
     echo ". /opt/ros/${ros_distribution}/setup.bash" >> ~/.bashrc; \
     fi
 
-ENTRYPOINT ["/home/ros2user/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["bash"]
