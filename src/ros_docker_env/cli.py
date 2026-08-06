@@ -19,6 +19,7 @@ def main():
     build_parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted"])
     build_parser.add_argument(
       "--gazebo", action="store_true", help="Install gazebo to image")
+    build_parser.add_argument("extra_args", nargs=argparse.REMAINDER)
     build_parser.set_defaults(func=handle_build)
 
     # Run Subcommand

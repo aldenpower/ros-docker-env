@@ -103,6 +103,7 @@ def handle_build(args) -> None:
             "--build-arg", f"ros_distribution={distro}",
             "--build-arg", f"gz_distribution={gz_version}",
             "--tag", f"{image_name}:{image_tag}",
+            *args.extra_args,
             "--file", str(resources_path.joinpath("docker/base.Dockerfile")),
             "."
         ]
