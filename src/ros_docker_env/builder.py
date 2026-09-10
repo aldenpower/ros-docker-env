@@ -10,7 +10,7 @@ Supported ROS distributions:
     - kilted
 
 Features:
-    - Select Ubuntu or NVIDIA CUDA/OpenGL base images
+    - Select Ubuntu base images
     - Optional Gazebo installation support
     - Docker build command generation
     - Automatic user UID and username propagation
@@ -19,13 +19,11 @@ Main entrypoints:
     - handle_build(args)
 
 The generated environments are intended for development containers
-with optional GPU acceleration and Gazebo simulation support.
+with Gazebo simulation support.
 """
 
-import sys
 from ros_docker_env import resources_path
 from os import getuid
-from ros_docker_env.utils import eprint
 
 
 def handle_build(args) -> None:
@@ -71,47 +69,44 @@ def handle_build(args) -> None:
     }
 
     distro = args.rosdistro
-    if distro not in config_map:
-        eprint(f"Unsupported ROS distribution: {distro}")
-        sys.exit(1)
 
-    try:
-        # Determine base image and Gazebo version
-        # base_image = config_map[distro]["nvidia"] if args.nvidia else config_map[distro]["base"]
-        base_image = config_map[distro]["base"]
-        gz_version = config_map[distro]["gz"] if args.gazebo else ""
+    base_image = config_map[distro]["base"]
 
-        image_tag = base_image.split(":")[-1]
-        image_name = f"ubuntu/ros_{distro}"
-        if args.gazebo:
-            image_name += "_gazebo"
+    image_tag = base_image.split(":")[-1]
+    image_name = f"ubuntu/ros_{distro}"
+    if args.gazebo:
+        image_name += "_gazebo"
 
-        docker = str(resources_path.joinpath("docker"))
-        tmux_config = str(resources_path.joinpath("tmux"))
-        bash = str(resources_path.joinpath("bash"))
-        scripts = str(resources_path.joinpath("scripts"))
+    docker = str(resources_path.joinpath("docker"))
+    tmux_config = str(resources_path.joinpath("tmux"))
+    bash = str(resources_path.joinpath("bash"))
+    scripts = str(resources_path.joinpath("scripts"))
 
-        # Build command construction
-        build_cmd = [
-            "docker", "build",
-            "--progress", "tty",
-            "--target", "dev",
-            "--build-context", f"tmux={tmux_config}",
-            "--build-context", f"bash={bash}",
-            "--build-context", f"docker={docker}",
-            "--build-context", f"scripts={scripts}",
-            "--build-arg", f"USER_UID={getuid()}",
-            "--build-arg", f"BASE_IMAGE={base_image}",
-            "--build-arg", f"ros_distribution={distro}",
-            "--build-arg", f"gz_distribution={gz_version}",
-            "--tag", f"{image_name}:{image_tag}",
-            *args.extra_args,
-            "--file", str(resources_path.joinpath("docker/base.Dockerfile")),
-            "."
+    # Build command construction
+    build_cmd = [
+        "docker", "build",
+        "--progress", "tty",
+        "--target", "dev",
+        "--build-context", f"tmux={tmux_config}",
+        "--build-context", f"bash={bash}",
+        "--build-context", f"docker={docker}",
+        "--build-context", f"scripts={scripts}",
+        "--build-arg", f"USER_UID={getuid()}",
+        "--build-arg", f"BASE_IMAGE={base_image}",
+        "--build-arg", f"ros_distribution={distro}"
+    ]
+
+    if args.gazebo:
+        gz_version = config_map[distro]["gz"]
+        build_cmd += [
+          "--build-arg", f"gz_distribution={gz_version}"
         ]
 
-        print(" ".join(build_cmd))
+    build_cmd += [
+        "--tag", f"{image_name}:{image_tag}",
+        *args.extra_args,
+        "--file", str(resources_path.joinpath("docker/base.Dockerfile")),
+        "."
+    ]
 
-    except OSError as e:
-        eprint(f"Build setup failed: {e}")
-        sys.exit(1)
+    print(" ".join(build_cmd))
