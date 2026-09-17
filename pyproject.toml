@@ -17,4 +17,7 @@ dependencies = []
 rosdocker = "ros_docker_env.cli:main"
 
 [tool.setuptools.package-data]
-ros_docker_env = ["resources/docker/*"]
+ros_docker_env = ["resources/docker/*",
+                  "resources/scripts/*",
+                  "resources/bash/*",
+                  "resources/tmux/*"]
