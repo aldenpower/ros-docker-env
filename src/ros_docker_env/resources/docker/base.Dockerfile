@@ -86,6 +86,10 @@ COPY --from=tmux tmux.conf /home/ros2user/.tmux.conf
 COPY --from=bash bash_aliases /home/ros2user/.bash_aliases
 COPY --from=docker entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY --from=scripts . /usr/local/bin/
+COPY --from=bash bash_prompt /home/ros2user/.bash_prompt
+
+RUN printf '\n[ -f "$HOME/.bash_prompt" ] && . "$HOME/.bash_prompt"\n' \
+    >> /home/ros2user/.bashrc
 
 RUN sudo apt update \
  && sudo apt install -y \
