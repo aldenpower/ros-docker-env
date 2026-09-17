@@ -3,35 +3,10 @@ import os
 import sys
 import subprocess
 from ros_docker_env.utils import eprint
-from ros_docker_env import resources_path
-
-
-def ensure_volume_exists(volume_name):
-    """Create Docker named volume if it does not exist."""
-
-    result = subprocess.run(
-      ["docker", "volume", "inspect", volume_name],
-      stdout=subprocess.DEVNULL,
-      stderr=subprocess.DEVNULL,
-      check=False
-    )
-    if result.returncode != 0:
-        print(f"Creating Docker volume: {volume_name}")
-        subprocess.run(
-            ["docker", "volume", "create", volume_name],
-            check=True
-        )
-
 
 
 def get_base_run_args(args):
     """Common arguments for both standard and NVIDIA runs."""
-
-    ensure_volume_exists("ros2_ws")
-
-    entrypoint = str(resources_path.joinpath("docker/entrypoint.sh"))
-    print(entrypoint)
-
     return [
         "docker", "run", "-it",
         "--net=host",
@@ -39,8 +14,6 @@ def get_base_run_args(args):
         "--env", f"DISPLAY={os.environ.get('DISPLAY')}",
         "--volume", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
         "--user", f"{os.getuid()}:{os.getgid()}",
-        # Persistent ROS 2 workspace cache
-        "--volume", "ros2_ws:/home/ros2user/ros2_ws",
     ]
 
 def handle_run(args):
