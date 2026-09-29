@@ -20,30 +20,32 @@ At the moment, ros-docker-env focuses on:
 
 ## Installation
 
+Install `uv` if it is not already available.
+
 ```bash
 git clone https://github.com/aldenpower/ros-docker-env.git
 cd ros-docker-env
-pip install .
+uv sync
 ```
 
 ## Usage
 Generate a build command for a ROS 2 image:
 ```bash
-rosdocker build humble
+uv run rosdocker build humble
 ```
 Generate a build command including Gazebo:
 ```bash
-rosdocker build jazzy --gazebo
+uv run rosdocker build jazzy --gazebo
 ```
 Execute the generated command:
 ```bash
-rosdocker build humble --gazebo | sh
+uv run rosdocker build humble --gazebo | sh
 ```
 Run a container from the generated image:
 ```bash
-rosdocker run [image_name]
+uv run rosdocker run [image_name]
 ```
 For help:
 ```bash
-rosdocker -h
+uv run rosdocker -h
 ```
