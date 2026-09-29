@@ -20,7 +20,7 @@ At the moment, ros-docker-env focuses on:
 
 ## Installation
 
-Install `uv` if it is not already available.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) if it is not already available, then:
 
 ```bash
 git clone https://github.com/aldenpower/ros-docker-env.git
