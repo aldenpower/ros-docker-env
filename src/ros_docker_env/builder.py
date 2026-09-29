@@ -65,6 +65,10 @@ def handle_build(args) -> None:
         "kilted": {
             "base": "ubuntu:noble",
             "gz": "gz-ionic"
+        },
+        "lyrical": {
+            "base": "ubuntu:resolute",
+            "gz": "gz-jetty"
         }
     }
 
