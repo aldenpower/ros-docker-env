@@ -8,6 +8,7 @@ Supported ROS distributions:
     - humble
     - jazzy
     - kilted
+    - lyrical
 
 Features:
     - Select Ubuntu base images
@@ -22,8 +23,8 @@ The generated environments are intended for development containers
 with Gazebo simulation support.
 """
 
-from ros_docker_env import resources_path
 from os import getuid
+from ros_docker_env import resources_path, CONFIG_MAP
 
 
 def handle_build(args) -> None:
@@ -51,30 +52,9 @@ def handle_build(args) -> None:
             Raised when an unsupported ROS distribution is selected
             or when build configuration generation fails.
     """
-    # Mapping configuration
-    # good to know: https://gazebosim.org/docs/latest/ros_installation/
-    config_map = {
-        "humble": {
-            "base": "ubuntu:jammy",
-            "gz": "ignition-fortress"
-        },
-        "jazzy": {
-            "base": "ubuntu:noble",
-            "gz": "gz-harmonic"
-        },
-        "kilted": {
-            "base": "ubuntu:noble",
-            "gz": "gz-ionic"
-        },
-        "lyrical": {
-            "base": "ubuntu:resolute",
-            "gz": "gz-jetty"
-        }
-    }
-
     distro = args.rosdistro
 
-    base_image = config_map[distro]["base"]
+    base_image = CONFIG_MAP[distro]["base"]
 
     image_tag = base_image.split(":")[-1]
     image_name = f"ubuntu/ros_{distro}"
@@ -101,7 +81,7 @@ def handle_build(args) -> None:
     ]
 
     if args.gazebo:
-        gz_version = config_map[distro]["gz"]
+        gz_version = CONFIG_MAP[distro]["gz"]
         build_cmd += [
           "--build-arg", f"gz_distribution={gz_version}"
         ]

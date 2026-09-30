@@ -1,6 +1,9 @@
+"""
+ros-docker-env
+"""
 import argparse
-from ros_docker_env.builder import handle_build
-from ros_docker_env.runner import handle_run, handle_run_nvidia
+from ros_docker_env import handle_run, handle_run_nvidia, handle_build
+from ros_docker_env import CONFIG_MAP
 
 def route_run_command(args):
     """Routes the run command to the correct function based on the --nvidia flag."""
@@ -10,13 +13,16 @@ def route_run_command(args):
         handle_run(args)
 
 def main():
+    """
+    cli main
+    """
     parser = argparse.ArgumentParser(prog="rosdocker")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     build_parser = subparsers.add_parser(
       "build", help="Generate ROS image build command")
 
-    build_parser.add_argument("rosdistro", choices=["humble", "jazzy", "kilted", "lyrical"])
+    build_parser.add_argument("rosdistro", choices=list(CONFIG_MAP.keys()))
     build_parser.add_argument(
       "--gazebo", action="store_true", help="Install gazebo to image")
     build_parser.add_argument("extra_args", nargs=argparse.REMAINDER)

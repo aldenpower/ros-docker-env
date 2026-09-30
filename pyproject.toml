@@ -1,23 +1,32 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "ros-docker-env"
 version = "0.1.0"
-description = "A simple Python package to manage a Docker-based ROS 2 environment."
+description = "A simple Python package to manage a Docker-based ROS 2 environment"
 readme = "README.md"
-requires-python = ">=3.9"
 authors = [
-  { name = "aldenpower" }
+    { name = "aldenpower", email = "eng.andersonfsl@gamil.com" }
 ]
+requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
 rosdocker = "ros_docker_env.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.14,<0.13.0"]
+build-backend = "uv_build"
 
 [tool.setuptools.package-data]
 ros_docker_env = ["resources/docker/*",
                   "resources/scripts/*",
                   "resources/bash/*",
                   "resources/tmux/*"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.16.2",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "--maxfail=1"
