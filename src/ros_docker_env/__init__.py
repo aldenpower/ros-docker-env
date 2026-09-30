@@ -1,10 +1,7 @@
-import sys
-
-# Support Python 3.9+ standard library, or fallback for older versions
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
-# Define the anchor path to your resources sub-package
-resources_path = resources.files("ros_docker_env.resources")
+"""
+ros-docker-env
+"""
+from ros_docker_env.settings import CONFIG_MAP
+from ros_docker_env.settings import resources_path
+from ros_docker_env.builder import handle_build
+from ros_docker_env.runner import handle_run, handle_run_nvidia

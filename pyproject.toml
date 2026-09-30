@@ -21,3 +21,12 @@ ros_docker_env = ["resources/docker/*",
                   "resources/scripts/*",
                   "resources/bash/*",
                   "resources/tmux/*"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.16.2",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "--maxfail=1"
