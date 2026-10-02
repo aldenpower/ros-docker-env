@@ -2,8 +2,11 @@
 ros-docker-env
 """
 import argparse
-from ros_docker_env import handle_run, handle_run_nvidia, handle_build
-from ros_docker_env import CONFIG_MAP
+
+from .builder import handle_build
+from .runner import handle_run, handle_run_nvidia
+from .settings import CONFIG_MAP
+
 
 def route_run_command(args):
     """Routes the run command to the correct function based on the --nvidia flag."""

@@ -23,8 +23,10 @@ The generated environments are intended for development containers
 with Gazebo simulation support.
 """
 
+import shlex
 from os import getuid
-from ros_docker_env import resources_path, CONFIG_MAP
+
+from .settings import CONFIG_MAP, resources_path
 
 
 def handle_build(args) -> None:
@@ -32,7 +34,7 @@ def handle_build(args) -> None:
     Generate a Docker build command for a ROS development environment.
 
     The build configuration is derived from the selected ROS distribution
-    and optional features such as NVIDIA GPU support and Gazebo integration.
+    and optional features such Gazebo integration.
 
     Supported ROS distributions:
         - humble
@@ -45,12 +47,6 @@ def handle_build(args) -> None:
                     ROS distribution name.
                 - gazebo (bool):
                     Enable Gazebo installation.
-                - nvidia (bool):
-                    Use NVIDIA-compatible base image.
-    Raises:
-        SystemExit:
-            Raised when an unsupported ROS distribution is selected
-            or when build configuration generation fails.
     """
     distro = args.rosdistro
 
@@ -93,4 +89,6 @@ def handle_build(args) -> None:
         "."
     ]
 
-    print(" ".join(build_cmd))
+    command = shlex.join(build_cmd)
+    print(command.replace(" --", " \\\n  --"))
+    return command.replace(" --", " \\\n  --")

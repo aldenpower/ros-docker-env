@@ -26,6 +26,7 @@ ros_docker_env = ["resources/docker/*",
 dev = [
     "coverage>=7.16.2",
     "pytest>=9.1.1",
+    "ruff>=0.16.9",
 ]
 
 [tool.pytest.ini_options]
