@@ -67,19 +67,19 @@ def handle_build(args) -> None:
         "docker", "build",
         "--progress", "tty",
         "--target", "dev",
+        "--build-arg", f"USER_UID={getuid()}",
+        "--build-arg", f"BASE_IMAGE={base_image}",
+        "--build-arg", f"ROS_DISTRO={distro}",
         "--build-context", f"tmux={tmux_config}",
         "--build-context", f"bash={bash}",
         "--build-context", f"docker={docker}",
         "--build-context", f"scripts={scripts}",
-        "--build-arg", f"USER_UID={getuid()}",
-        "--build-arg", f"BASE_IMAGE={base_image}",
-        "--build-arg", f"ros_distribution={distro}"
     ]
 
     if args.gazebo:
         gz_version = CONFIG_MAP[distro]["gz"]
         build_cmd += [
-          "--build-arg", f"gz_distribution={gz_version}"
+          "--build-arg", f"GZ_DISTRO={gz_version}"
         ]
 
     build_cmd += [
