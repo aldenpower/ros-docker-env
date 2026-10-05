@@ -1,9 +1,5 @@
 from argparse import Namespace
 
-import subprocess
-
-
-
 import pytest
 
 from ros_docker_env import CONFIG_MAP, handle_build
