@@ -9,11 +9,12 @@ from .settings import CONFIG_MAP
 
 
 def route_run_command(args):
-    """Routes the run command to the correct function based on the --nvidia flag."""
+    """Routes the run command to function based on the --nvidia flag."""
     if args.nvidia:
         handle_run_nvidia(args)
     else:
         handle_run(args)
+
 
 def main():
     """
