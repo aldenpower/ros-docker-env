@@ -5,7 +5,7 @@ import argparse
 
 from .builder import handle_build
 from .runner import handle_run, handle_run_nvidia
-from .settings import CONFIG_MAP
+from .settings import CONFIG_MAP, RUN_EPILOG
 
 
 def route_run_command(args):
@@ -34,12 +34,23 @@ def main():
 
     # Run Subcommand
     run_parser = subparsers.add_parser(
-      "run", help="Run the ROS container")
+      "run", help="Run the ROS container",
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      epilog=RUN_EPILOG,)
 
     run_parser.add_argument(
       "--nvidia", action="store_true", help="Use nvidia images")
+    run_parser.add_argument(
+      "--docker-arg", dest="extra_args", action="append",
+      default=[], help="Extra argument passed to docker run",
+    )
     run_parser.add_argument("image_name", help="Name of the image to run")
-    run_parser.add_argument("extra_args", nargs=argparse.REMAINDER)
+    run_parser.add_argument(
+        "container_command",
+        nargs=argparse.REMAINDER,
+        metavar="COMMAND",
+        help="Command to execute inside the container",
+    )
     run_parser.set_defaults(func=route_run_command)
 
     args = parser.parse_args()
