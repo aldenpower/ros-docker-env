@@ -62,25 +62,24 @@ def handle_build(args) -> None:
     bash = str(resources_path.joinpath("bash"))
     scripts = str(resources_path.joinpath("scripts"))
 
-    # Build command construction
     build_cmd = [
         "docker", "build",
         "--progress", "tty",
-        "--target", "dev",
+        "--target", "dev"
+    ]
+    build_cmd += [
         "--build-arg", f"USER_UID={getuid()}",
         "--build-arg", f"BASE_IMAGE={base_image}",
-        "--build-arg", f"ROS_DISTRO={distro}",
-        "--build-context", f"tmux={tmux_config}",
-        "--build-context", f"bash={bash}",
-        "--build-context", f"docker={docker}",
-        "--build-context", f"scripts={scripts}",
-    ]
-
+        "--build-arg", f"ROS_DISTRO={distro}"]
     if args.gazebo:
         gz_version = CONFIG_MAP[distro]["gz"]
         build_cmd += [
-          "--build-arg", f"GZ_DISTRO={gz_version}"
-        ]
+          "--build-arg", f"GZ_DISTRO={gz_version}"]
+    build_cmd += [
+        "--build-context", f"tmux={tmux_config}",
+        "--build-context", f"bash={bash}",
+        "--build-context", f"docker={docker}",
+        "--build-context", f"scripts={scripts}"]
 
     build_cmd += [
         "--tag", f"{image_name}:{image_tag}",
