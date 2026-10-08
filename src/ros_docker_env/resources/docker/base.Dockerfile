@@ -20,6 +20,7 @@ RUN apt-get update \
         build-essential \
         cmake \
         wget \
+        python3-pip \
         software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
